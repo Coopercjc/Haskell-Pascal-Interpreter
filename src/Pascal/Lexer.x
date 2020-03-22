@@ -39,12 +39,13 @@ tokens :-
   $white+                               ; -- remove multiple white-spaces
   "//".*                                ; -- skip one line comments
   $digit+                               { tok_read     TokenInt }
+  $digit+\.$digits*                     { tok_read     TokenFloat }
   [\+]|[\-]|[\*]|[\/]|[=]               { tok_read     TokenOp }
   [\(]|[\)]|begin|end|true|false        { tok_read     TokenK }
   [:=]                                  { tok_read     TokenOp }
   $alpha [$alpha $digit \_ \']*         { tok_string   TokenID }
 
-{
+{}
 
 -- Some action helpers:
 tok' f (p, _, input, _) len = return $ Token p (f (B.take (fromIntegral len) input))
@@ -65,6 +66,7 @@ data TokenClass
  = TokenOp     String
  | TokenK      String
  | TokenInt    Int
+ | TokenFloat   Float
  | TokenID    String
  | TokenEOF
  deriving (Eq, Show)

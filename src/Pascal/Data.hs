@@ -33,17 +33,28 @@ data BoolExp =
     -- true and false constants
     | True_C
     | False_C
+    | Var_B String
+
+data GenExp = FloatExp Exp | BExp BoolExp
 
 -- Data-structure for statements
 data Statement = 
     -- TODO: add other statements
     -- Variable assignment
-     Assign String Exp
+     Assign String GenExp
     -- If statement
     | If BoolExp Statement Statement
     -- Block
     | Block [Statement]
 
+data VTypes = REAL | BOOL | STRING;
+
+data Definition = 
+    -- Variable definition, list of var, type
+    VarDef [String] VTypes
+    -- Procedures
+    | Proc String [(String, VTypes)] Statement
+ 
 -- Data-structure for hole program
 -- TODO: add declarations and other useful stuff
 -- Hint: make a tuple containing the other ingredients
