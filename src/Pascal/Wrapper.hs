@@ -12,7 +12,7 @@ import qualified Data.ByteString.Lazy.Char8 as BLC
 
 import           Data.List            (isPrefixOf)
 ----
-import           Pascal.Lexer           (runAlex)
+import           Pascal.Lexer            (runAlex)
 import           Pascal.Data            (Program)
 import           Pascal.Parser          (happyParser)
 ----------------------------------------------------------------------------
