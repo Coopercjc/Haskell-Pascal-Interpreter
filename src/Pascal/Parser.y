@@ -23,13 +23,24 @@ import Pascal.Lexer
         '='             { Token _ (TokenOp "=")   }
         '('             { Token _ (TokenK  "(")   }
         ')'             { Token _ (TokenK  ")")   }
+        ':='            { Token _ (TokenOp ":=")   }
         'begin'         { Token _ (TokenK "begin") }
         'end'           { Token _ (TokenK "end")  }
-        ':='            { Token _ (TokenK ":=")   }
         'true'          { Token _ (TokenK "true") }
         'false'         { Token _ (TokenK "false") }
         'and'           { Token _ (TokenK "and") }
         'not'           { Token _ (TokenK "not") }
+        'for'           { Token _ (TokenK "for") }
+        'while'         { Token _ (TokenK "while") }
+        'case'          { Token _ (TokenK "case") }
+        'break'         { Token _ (TokenK "break") }
+        'continue'      { Token _ (TokenK "continue") }
+        'if'            { Token _ (TokenK "if") }
+        'else'          { Token _ (TokenK "else") }
+        'then'          { Token _ (TokenK "then") }
+        'of'            { Token _ (TokenK "of") }
+
+
 
 -- associativity of operators in reverse precedence order
 %nonassoc '>' '>=' '<' '<=' '==' '!='
