@@ -74,7 +74,7 @@ data Statement =
     -- While
     | While BoolExp Statement
     -- For
-    | For Statement Exp
+    | For String Exp Exp Statement
     -- Break
     | Break
     -- Continue
