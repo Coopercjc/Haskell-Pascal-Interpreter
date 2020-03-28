@@ -81,7 +81,7 @@ Statements :: {[Statement]}
 
 Statement :: {Statement}
     : ID ':=' Exp { Assign $1 $3 }
-    | 'for' ID ':=' int 'to' int 'do' Program { For $2 $4 $6 }
+    | 'for' ID ':=' int 'to' int 'do' Program { For $2 $4 $6 $8 }
     | 'while' '(' BoolExp ')' 'do' Statement { While $3 $6 }
     | 'case' ID 'of' Statements 'else' Statement { Case $2 $4 $6 }
     | 'break' { Break }
