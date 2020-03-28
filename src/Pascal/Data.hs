@@ -79,6 +79,7 @@ data Statement =
     | Break
     -- Continue
     | Continue
+    | Statements
 
 
 -- Data-structure for whole program

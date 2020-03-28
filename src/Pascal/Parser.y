@@ -81,13 +81,13 @@ Statements :: {[Statement]}
 
 Statement :: {Statement}
     : ID ':=' Exp { Assign $1 $3 }
-    | 'for' ID ':=' int 'to' int 'do' Program { For $2 $4 $6 $8 }
+    | 'for' ID ':=' Exp 'to' Exp 'do' Statement { For $2 $4 $6 $8 }
     | 'while' '(' BoolExp ')' 'do' Statement { While $3 $6 }
-    | 'case' ID 'of' Statements 'else' Statement { Case $2 $4 $6 }
+    | 'case' ID 'of' Statement 'else' Statement { Case $2 $4 $6 }
     | 'break' { Break }
     | 'continue' { Continue }
     | 'if' '(' BoolExp ')' 'then' Statement 'else' Statement { If $3 $6 $8 }
     | 'writeln' '(' Statement ')' { Writeln $3 }
-    | 'readln' '(' Statement ')' { Readln $3 }
+    | 'readln' '(' ID ')' { Readln $3 }
 
 {}
