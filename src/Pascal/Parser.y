@@ -39,6 +39,8 @@ import Pascal.Lexer
         'else'          { Token _ (TokenK "else") }
         'then'          { Token _ (TokenK "then") }
         'of'            { Token _ (TokenK "of") }
+        'to'            { Token _ (TokenK "to") }
+        'do'            { Token _ (TokenK "of") }
 
 
 
@@ -67,11 +69,16 @@ BoolExp :: {BoolExp}
     | 'not' BoolExp { Not $2 }
     | BoolExp 'and' BoolExp { OpB "and" $1 $3 }
 
+--MathExp :: {MathExp}
+  --  : '-' MathExp { Op1 "-" $2}
+    --| MathExp '/' MathExp { OpM2 "/" $1 $3} 
+
 Statements :: {[Statement]}
     : { [] } -- nothing; make empty list
     | Statement Statements { $1:$2 } -- put statement as first element of statements
 
 Statement :: {Statement}
     : ID ':=' Exp { Assign $1 $3 }
+    
 
 {}

@@ -5,6 +5,7 @@ module Pascal.Data
     (
         Exp(..),
         BoolExp(..),
+        -- MathExp(..),
         Statement(..),
         Program
     ) where
@@ -34,17 +35,51 @@ data BoolExp =
     | True_C
     | False_C
 
+-- Data-structure for boolean expressions
+-- data MathExp = 
+    -- unary operator: Op name expression
+    -- OpM1 String Exp
+    -- binary operator on math expressions
+    -- | OpM2 String MathExp MathExp
+    -- real value
+    -- | Realm Float
+
+
 -- Data-structure for statements
 data Statement = 
     -- TODO: add other statements
+    Prgm String 
     -- Variable assignment
-     Assign String Exp
+    | Assign String Exp
     -- If statement
     | If BoolExp Statement Statement
+    -- Else If statement
+    | ElseIf BoolExp Statement 
+    -- Else
+    | Else Statement
     -- Block
     | Block [Statement]
+    -- Case
+    | Case String Statement
+    -- Cases for Case
+    | Cases String Statement
+    -- Writeln
+    | Writeln Statement
+    -- No var
+    | Write Statement
+    -- Var
+    | WriteVar Statement String
+    -- Readln
+    | Readln String
+    -- While
+    | While BoolExp Statement
+    -- For
+    | For Statement BoolExp Statement
+    -- Increment
+    | Increment String
 
--- Data-structure for hole program
+
+-- Data-structure for whole program
 -- TODO: add declarations and other useful stuff
 -- Hint: make a tuple containing the other ingredients
 type Program = [Statement]
