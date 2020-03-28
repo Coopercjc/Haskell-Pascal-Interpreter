@@ -60,23 +60,25 @@ data Statement =
     -- Block
     | Block [Statement]
     -- Case
-    | Case String Statement
+    | Case String Statement Statement
     -- Cases for Case
     | Cases String Statement
     -- Writeln
     | Writeln Statement
-    -- No var
+    -- Writeln - No var
     | Write Statement
-    -- Var
+    -- Writeln - Var
     | WriteVar Statement String
     -- Readln
     | Readln String
     -- While
     | While BoolExp Statement
     -- For
-    | For Statement BoolExp Statement
-    -- Increment
-    | Increment String
+    | For Statement Exp
+    -- Break
+    | Break
+    -- Continue
+    | Continue
 
 
 -- Data-structure for whole program

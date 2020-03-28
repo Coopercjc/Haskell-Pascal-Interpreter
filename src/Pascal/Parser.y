@@ -33,6 +33,8 @@ import Pascal.Lexer
         'for'           { Token _ (TokenK "for") }
         'while'         { Token _ (TokenK "while") }
         'case'          { Token _ (TokenK "case") }
+        'writeln'       { Token _ (TokenK "writeln") }
+        'readln'        { Token _ (TokenK "readln") }
         'break'         { Token _ (TokenK "break") }
         'continue'      { Token _ (TokenK "continue") }
         'if'            { Token _ (TokenK "if") }
@@ -79,6 +81,13 @@ Statements :: {[Statement]}
 
 Statement :: {Statement}
     : ID ':=' Exp { Assign $1 $3 }
-    
+    | 'for' ID ':=' int 'to' int 'do' Program { For Assign $2 $4 $6 }
+    | 'while' '(' BoolExp ')' 'do' Statement { While $3 $6 }
+    | 'case' ID 'of' Statements 'else' Statement { Case $2 $4 $6 }
+    | 'break' { Break }
+    | 'continue' { Continue }
+    | 'if' '(' BoolExp ')' 'then' Statement 'else' Statement { If $3 $6 $8 }
+    | 'writeln' '(' Statement ')' { Writeln $3 }
+    | 'readln' '(' Statement ')' { Readln $3 }
 
 {}
