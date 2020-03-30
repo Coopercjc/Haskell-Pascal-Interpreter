@@ -1,5 +1,5 @@
 # Haskell-Pascal-Interpreter
-To run the project, run "Cabal run src/test#.pas"
+To run the project, run "Cabal run src/testfile.pas" or "Cabal run src/tests/test#.pas".
 
 ## To-Do:
 
