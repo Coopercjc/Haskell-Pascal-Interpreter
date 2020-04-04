@@ -26,20 +26,33 @@ import Pascal.Lexer
         '('             { Token _ (TokenK  "(")   }
         ')'             { Token _ (TokenK  ")")   }
         ':='            { Token _ (TokenOp ":=")   }
-        ','             { Token _  (TokenK ",")   }
+        ','             { Token _ (TokenK ",")   }
         ';'             { Token _ (TokenK ";")   }
         ':'             { Token _ (TokenK ":")   }
         '.'             { Token _ (TokenK ".")   }
+        '<>'            { Token _ (TokenOp "<>")  }
+        '>'             { Token _ (TokenOp ">")  }
+        '<'             { Token _ (TokenOp "<")  }
+        '<='            { Token _ (TokenOp "<=")  }
+        '>='            { Token _ (TokenOp ">=")  }
+        'sqrt'          { Token _ (TokenOp "sqrt") }
+        'ln'            { Token _ (TokenOp "ln") }
+        'exp'           { Token _ (TokenOp "exp") }
+        'sin'           { Token _ (TokenOp "sin") }
+        'cos'           { Token _ (TokenOp "cos") }
         'program'       { Token _ (TokenK "program") }
         'var'           { Token _ (TokenK "var")  }
+        'procedure'     { Token _ (TokenK "procedure") }
+        'function'      { Token _ (TokenK "function") }
         'real'          { Token _ (TokenK "real")  }
         'boolean'       { Token _ (TokenK "boolean")  }
         'begin'         { Token _ (TokenK "begin") }
         'end'           { Token _ (TokenK "end")  }
         'true'          { Token _ (TokenK "true") }
         'false'         { Token _ (TokenK "false") }
-        'and'           { Token _ (TokenK "and") }
-        'not'           { Token _ (TokenK "not") }
+        'and'           { Token _ (TokenOp "and") }
+        'not'           { Token _ (TokenOp "not") }
+        'or'            { Token _ (TokenOp "or") }
         'for'           { Token _ (TokenK "for") }
         'while'         { Token _ (TokenK "while") }
         'case'          { Token _ (TokenK "case") }
@@ -63,66 +76,139 @@ import Pascal.Lexer
 %nonassoc ':='
 %%
 
--- Entry point
+
+--------------- Main program ---------------
+
+
 Program :: {Program}
-    : 'program' ID ';' VarBlock 'begin' Statements 'end' '.' { ($4, $6) }
+    : 'program' ID ';' VarBlock FuncDecBlock Block '.' { (($4, $5), $6) }
+
+
+--------------- Variable Declarations ---------------
+
 
 VarBlock :: {[VarDec]}
     : 'var' VarDecs { $2 }
 
 VarDecs :: {[VarDec]}
-    : { [] } -- nothing
+    : { [] }
     | VarDec VarDecs { $1:$2 }
 
 VarDec :: {VarDec}
-    : ID ':' 'real' '=' Exp ';' { Init $1 (FloatExp $5) }
-    | ID ':' 'boolean' '=' BoolExp ';' { Init $1 (BoolExp $5) }
-    | ID ':' 'real' ';' { DecF $1 }
-    | ID ':' 'boolean' ';' { DecB $1 }
+    : ID ':' 'real' '=' RealExp ';'        { Init $1 (FloatExp $5) }
+    | ID ':' 'boolean' '=' BoolExp ';'     { Init $1 (BoolExp $5) }
+    | ID ':' 'real' ';'                    { DecFloat $1 }
+    | ID ':' 'boolean' ';'                 { DecBool $1 }
 
--- Expressions
-Exp :: {Exp}
-    : '+' Exp { $2 } -- ignore Plus
-    | '-' Exp { Op1 "-" $2}
-    | Exp '+' Exp { Op2 "+" $1 $3 }
-    | Exp '*' Exp { Op2 "*" $1 $3 }
-    | '(' Exp ')' { $2 } -- ignore brackets
-    | float { Real $1 }
-    | ID { Var $1 }
 
+--------------- Expressions ---------------
+
+-- Real expresions
+RealExp :: {RealExp}
+    : '-' RealExp                           { Op1 "-" $2}
+    | 'sqrt' '(' RealExp ')'                { Op3 "sqrt" $3 }
+    | 'ln' '(' RealExp ')'                  { Op3 "ln" $3 }
+    | 'exp' '(' RealExp ')'                 { Op3 "exp" $3 }
+    | 'sin' '(' RealExp ')'                 { Op3 "sin" $3 }
+    | 'cos' '(' RealExp ')'                 { Op3 "cos" $3 }
+    | RealExp '*' RealExp                   { Op2 "*" $1 $3 }
+    | RealExp '/' RealExp                   { Op2 "/" $1 $3 }
+    | RealExp '+' RealExp                   { Op2 "+" $1 $3 }
+    | RealExp '-' RealExp                   { Op2 "-" $1 $3 }
+    | '(' RealExp ')'                       { $2 }
+    | float                                 { Real $1 }             -- Base case - number
+    | ID                                    { RealVar $1 }          -- Base case - variable
+
+-- Boolean expressions
 BoolExp :: {BoolExp}
-    : 'true' { True_C }
-    | 'false' { False_C }
-    | 'not' BoolExp { Not $2 }
-    | BoolExp 'and' BoolExp { OpB "and" $1 $3 }
+    : BoolExp 'and' BoolExp                 { BoolOp "and" $1 $3 }
+    | BoolExp 'or' BoolExp                  { BoolOp "or" $1 $3 }
+    | 'not' BoolExp                         { Not $2 }
+    | RealExp '=' RealExp                   { Comp "=" $1 $3 }
+    | RealExp '<>' RealExp                  { Comp "<>" $1 $3 }
+    | RealExp '>' RealExp                   { Comp ">" $1 $3 }
+    | RealExp '>=' RealExp                  { Comp ">=" $1 $3 }
+    | RealExp '<' RealExp                   { Comp "<" $1 $3 }
+    | RealExp '<=' RealExp                  { Comp "<=" $1 $3 }
+    | bool                                  { Boolean $1 }          -- Base case - boolean
+    | ID                                    { BoolVar $1 }          -- Base case - variable
 
---MathExp :: {MathExp}
-  --  : '-' MathExp { Op1 "-" $2}
-    --| MathExp '/' MathExp { OpM2 "/" $1 $3} 
 
+--------------- Statements ---------------
+
+
+-- Block of statments
+StateBlock :: {[Statement]}
+    : Block ';' { $1 }
+    | Statement { [$1] }
+
+Block :: {[Statement]}
+    : 'begin' Statements 'end' { $2 }
+
+-- Statement list
 Statements :: {[Statement]}
-    : { [] } -- nothing; make empty list
-    | Statement Statements { $1:$2 } -- put statement as first element of statements
+    : { [] }                            -- nothing; make empty list
+    | Statement Statements { $1:$2 }    -- put statement as first element of statements
 
+-- Individual statements
 Statement :: {Statement}
-    : ID ':=' Exp { Assign $1 $3 }
-    | 'for' ID ':=' Exp 'to' Exp 'do' Statement { For $2 $4 $6 $8 }
-    | 'while' '(' BoolExp ')' 'do' Statement { While $3 $6 }
-    | 'case' ID 'of' Statement 'else' Statement { Case $2 $4 $6 }
-    | 'break' { Break }
-    | 'continue' { Continue }
-    | 'if' '(' BoolExp ')' 'then' Statement 'else' Statement { If $3 $6 $8 }
-    | 'writeln' '(' Val ')' ';' { Writeln $3 }
-    | 'readln' '(' ID ')' { Readln $3 }
+    : ID ':=' Generic ';' { Assign $1 $3}
+    | ID '(' Parameters ')' ';' { ProcCall $1 $3 }            -- Procedure
+    | ID ':=' ID '(' Parameters ')' ';' { FuncCall $1 $3 $5 } -- Function call
+    | 'writeln' '(' Vals ')' ';' { Writeln $3 }               -- Writeln
+    -- TODO: If, Case, for, while
 
-Val :: {Val}
-    : ID { Val_ID $1 }
-    | string { Val_S $1 }
-
+-- For writeln
 Vals :: {[Val]}
-    : {[]} --nothing
+    : {[]} 
     | Val { [$1] }
     | Vals { $1 }
     | Val ',' Vals { $1:$3 }
+
+Val :: {Val}
+    : ID { ValueID $1 }
+    | RealExp { DataExp (FloatExp $1) }
+    | BoolExp { DataExp (BoolExp $1) }
+    | string { ValueStr $1 }
+
+
+--------------- Functions ---------------
+
+
+-- Parameters of the function
+Parameters :: {[Val]}
+    : { [] } --nothing
+    | Generic { [$1] }
+    | Parameters { $1 }
+    | Generic ',' Parameters { $1:$3 }
+
+-- Generic "data" type
+Generic :: {Val}
+    : ID {(ValueID $1)}
+    | RealExp { DataExp (FloatExp $1) }
+    | BoolExp { DataExp (BoolExp $1) }
+
+FuncDecBlock :: { [Function] }
+    : { [] } -- nothing
+    | FuncDec FuncDecBlock { $1:$2 }
+
+FuncDec :: {Function}
+    : 'function' ID '(' FormalParamList ')' ':' 'real' ';' VarBlock Block ';' { ($2, (ReturnReal $4 $9 $10)) }
+    | 'function' ID '(' FormalParamList ')' ':' 'boolean' ';' VarBlock Block ';' {  ($2, (ReturnBool $4 $9 $10)) }
+    | 'procedure' ID '(' FormalParamList ')' ';' VarBlock Block ';' { ($2, (ReturnNone $4 $7 $8)) }
+
+FormalParamList :: { [String] }
+    : { [] } --nothing
+    | ParamGroup { $1 }
+    | FormalParamList { $1 }
+    | ParamGroup ';' FormalParamList { $1 ++ $3 }
+
+ParamGroup :: { [String] }
+    : VariableList ':' 'real' { $1 }
+    | VariableList ':' 'boolean' { $1 }
+
+VariableList :: { [String] }
+    : ID { [$1] }
+    | ID ',' VariableList { $1:$3 }
 
 {}

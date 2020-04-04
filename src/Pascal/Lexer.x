@@ -38,12 +38,18 @@ $alpha = [a-zA-Z]               -- alphabetic characters
 tokens :-
   $white+                               ; -- remove multiple white-spaces
   "//".*                                ; -- skip one line comments
-  $digit+                               { tok_read     TokenReal }
-  [\+]|[\-]|[\*]|[\/]|[\=]               { tok_string     TokenOp }
-  [\(]|[\)]|[\;]|[\:]|[\.]|[\,]|program|var|begin|real|boolean|
-  end|true|false|and|not|for|while|case|break|continue|
-  if|else|then|of|to|do|writeln|readln  { tok_string     TokenK }
-  [:=]                                  { tok_string     TokenOp }
+  $digit+ "." $digit+ | $digit+         { tok_read     TokenReal }
+  True|False                            { tok_read     TokenBool }
+  "'" [$alpha $digit \ ]* "'"           { tok_string   TokenStr }
+  \:=                                   { tok_string   TokenOp }
+  [\+]|[\-]|[\*]|[\/]|[\=]|[\<>]|[\>]
+  |[\<]|[\>=]|[\<=]|and|not|or
+  |sqrt|ln|exp|sin|cos                  { tok_string   TokenOp }
+  [\(]|[\)]|[\;]|[\:]|[\.]|[\,]
+  |program|var|function|procedure
+  |begin|real|boolean|end|true|false
+  |for|while|case|break|continue
+  |if|else|then|of|to|do|writeln|readln { tok_string   TokenK }
   $alpha [$alpha $digit \_ \']*         { tok_string   TokenID }
 
 {
@@ -69,7 +75,7 @@ data TokenClass
  | TokenStr    String
  | TokenReal   Float
  | TokenBool   Bool
- | TokenID    String
+ | TokenID     String
  | TokenEOF
  deriving (Eq, Show)
 

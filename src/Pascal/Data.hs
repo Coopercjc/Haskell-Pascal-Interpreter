@@ -3,94 +3,107 @@
 
 module Pascal.Data
     (
-        Exp(..),
+        RealExp(..),
         BoolExp(..),
-        -- MathExp(..),
-        GenExp(..),
+        Data(..),
         Val(..),
         VarDec(..),
         Statement(..),
-        Program
+        FunctionBody(..),
+        Program,
+        Variables,
+        Functions,
+        Function
     ) where
 
-data GenExp =
-    FloatExp Exp
-    | BoolExp BoolExp
+import qualified Data.Map.Strict as M
 
--- Data-structure for  numeric expressions
-data Exp =
+-- Our generic "data" type from last project
+data Data =
+    FloatExp RealExp
+    | BoolExp BoolExp
+    -- Show lets us display as string
+    deriving (Show, Eq)
+
+-- Data-structure for real expressions
+data RealExp =
     -- unary operator: Op name expression
-    Op1 String Exp
+    Op1 String RealExp
     -- binary operator: Op name leftExpression rightExpression
-    | Op2 String Exp Exp
-    -- function call: FunctionCall name ListArguments
-    | FunCall String [Exp]
-    -- real value: e.g. Real 1.0
+    | Op2 String RealExp RealExp
+    -- Equations
+    | Op3 String RealExp
+    -- Real value
     | Real Float
-    -- variable: e.g. Var "x"
-    | Var String
+    -- FunctionCall
+    | RFuncCall String [Val]
+    -- Variable
+    | RealVar String
+    deriving (Show, Eq)
 
 -- Data-structure for boolean expressions
 data BoolExp = 
     -- binary operator on boolean expressions
-    OpB String BoolExp BoolExp
+    BoolOp String BoolExp BoolExp
     -- negation, the only unary operator
     | Not BoolExp
     -- comparison operator: Comp name expression expression
-    | Comp String Exp Exp
-    -- true and false constants
-    | True_C
-    | False_C
+    | Comp String RealExp RealExp
+    -- Bool value
+    | Boolean Bool
+    -- Variable
+    | BoolVar String
+    deriving (Show, Eq)
 
 -- Data-structure for statements
 data Statement = 
     -- TODO: add other statements
     -- Variable assignment
-    Assign String Exp
-    -- If statement
-    | If BoolExp Statement Statement
-    -- Else If statement
-    | ElseIf BoolExp Statement 
-    -- Else
-    | Else Statement
+    Assign String Val
+    -- procedure call
+    | ProcCall String [Val]
+    -- function call: FunctionCall name ListArguments
+    | FuncCall String String [Val]
+    -- writeln statement
+    | Writeln [Val]
     -- Block
     | Block [Statement]
-    -- Case
-    | Case String Statement Statement
-    -- Cases for Case
-    | Cases String Statement
-    -- Writeln
-    | Writeln Val
-    -- Writeln - No var
-    | Write Statement
-    -- Writeln - Var
-    | WriteVar Statement String
-    -- Readln
-    | Readln String
-    -- While
-    | While BoolExp Statement
-    -- For
-    | For String Exp Exp Statement
-    -- Break
-    | Break
-    -- Continue
-    | Continue
-    | Statements
+    deriving (Show, Eq)
 
 data Val =
-    Val_ID String
-    | Val_S String
+    ValueID String
+    | DataExp Data
+    | ValueStr String
+    deriving (Show, Eq)
 
 data VarDec =
     -- Initializing a Real or Boolean expression
-    Init String GenExp
+    Init String Data
     -- Declaring a Real Expression to default value
-    | DecF String
+    | DecFloat String
     -- Declaring a Boolean Expression to default value
-    | DecB String
+    | DecBool String
+    deriving (Show, Eq)
+
+data FunctionBody = 
+    -- Return types
+    ReturnReal [String] [VarDec] [Statement]
+    | ReturnBool [String] [VarDec] [Statement]
+    | ReturnNone [String] [VarDec] [Statement]
+    deriving (Show, Eq)
 
 
 -- Data-structure for whole program
 -- TODO: add declarations and other useful stuff
 -- Hint: make a tuple containing the other ingredients
-type Program = ([VarDec], [Statement])
+type Program = (([VarDec], [Function]), [Statement])
+
+-- Data-structure for functions
+type Function = (String, FunctionBody)
+
+-- Map for variables
+type Variables = M.Map String Data
+
+-- Map for functions
+type Functions = M.Map String FunctionBody
+
